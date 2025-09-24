@@ -46,15 +46,13 @@ pip install -r requirements.txt
 Train the WaveDiffDecloud model on different datasets:
 
 ```bash
-# Train on weather/cloud removal dataset
-python train_weather_script.py
 
 # Train on rice dataset variants
 python train_diffusion.py --config "rice1.yml" --resume "Rice1_ddpm.pth.tar"
 
 # Train with different configurations
 python train_hfrm.py
-python train.py --config "rice1.yml" --resume "Rice2_ddpm.pth.tar"
+python train.py --config "rice2.yml" --resume "Rice2_ddpm.pth.tar"
 ```
 
 ### Evaluation
@@ -121,7 +119,7 @@ If you find this repository/work helpful in your research, please cite our paper
 @article{huang2024wavediffdecloud,
   title={WaveDiffDecloud: Wavelet-Domain Conditional Diffusion Model for Efficient Cloud Removal},
   author={Huang, Yingjie},
-  journal={[Journal Name]},
+  journal={},
   year={2024},
   publisher={}
 }
