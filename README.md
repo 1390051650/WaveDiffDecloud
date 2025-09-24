@@ -50,12 +50,11 @@ Train the WaveDiffDecloud model on different datasets:
 python train_weather_script.py
 
 # Train on rice dataset variants
-python train_diffusion.py --config "rice1.yml" --resume "Rice1_epoch630_ddpm.pth.tar"
-python train_diffusion.py --config "rice2.yml" --resume "R210.pth.tar"
+python train_diffusion.py --config "rice1.yml" --resume "Rice1_ddpm.pth.tar"
 
 # Train with different configurations
 python train_hfrm.py
-python train.py --config "rice1.yml" --resume "Rice2_epoch390_ddpm.pth.tar"
+python train.py --config "rice1.yml" --resume "Rice2_ddpm.pth.tar"
 ```
 
 ### Evaluation
@@ -74,8 +73,6 @@ python eval_diffusion.py --config "rice1.yml" --resume "Rice1_epoch390_ddpm.pth.
 ### Configuration
 
 The model can be configured using YAML files in the `configs/` directory:
-- `raindrop_wavelet.yml`: Raindrop dataset with wavelet processing
-- `raindrop.yml`: Standard raindrop dataset configuration
 - `rice1.yml`: Rice dataset variant 1
 - `rice2.yml`: Rice dataset variant 2
 
@@ -102,7 +99,6 @@ The WaveDiffDecloud model consists of several key components:
 
 This implementation supports multiple datasets for cloud removal:
 
-- **Raindrop Dataset**: Synthetic raindrop removal
 - **Rice Datasets**: Agricultural satellite imagery with cloud coverage
 - **Custom Datasets**: Easily extensible to other satellite imagery datasets
 
@@ -127,7 +123,7 @@ If you find this repository/work helpful in your research, please cite our paper
   author={Huang, Yingjie},
   journal={[Journal Name]},
   year={2024},
-  publisher={[Publisher]}
+  publisher={}
 }
 ```
 
@@ -139,5 +135,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For questions and support, please contact:
 - Author: Yingjie Huang
-- Email: [your-email@domain.com]
+- Email: [2020110298@ecut.edu.cn]
 
