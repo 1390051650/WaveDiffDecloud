@@ -4,7 +4,7 @@
 
 ## Abstract
 
-This repository contains the implementation of WaveDiffDecloud, a novel approach for cloud removal in satellite imagery using wavelet-domain conditional diffusion models. The method leverages the multi-scale representation capabilities of wavelets combined with the powerful generative capabilities of diffusion models to efficiently remove clouds while preserving fine details in satellite images.
+This repository contains the implementation of WaveDiffDecloud, a novel approach for cloud removal in satellite imagery using wavelet-domain conditional diffusion models. The method leverages the multi-scale representation capabilities of wavelets combined with the powerful generative capabilities of diffusion models to efficiently remove clouds while preserving fine details in satellite images.(The complete code will be uploaded after the paper is accepted)
 
 ## Key Features
 
