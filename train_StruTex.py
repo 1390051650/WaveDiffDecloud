@@ -25,16 +25,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-# ---------------------------
-# 定义PSNR计算函数
 def BatchPSNR(tar_img, prd_img):
     imdff = torch.clamp(prd_img, 0, 1) - torch.clamp(tar_img, 0, 1)
     rmse = (imdff**2).mean(dim=(1,2,3)).sqrt()
     ps = 20 * torch.log10(1/rmse + 1e-8)
     return ps
 
-# ---------------------------
-# 数据预处理函数
 def data_transform(X):
     return 2 * X - 1.0
 
@@ -44,8 +40,6 @@ def inverse_data_transform(X):
 def compute_l1_loss(input, output):
     return torch.mean(torch.abs(input - output))
         
-# ---------------------------
-# TVLoss（总变分损失）定义
 class TVLoss(nn.Module):
     def __init__(self, TVLoss_weight=1):
         super(TVLoss, self).__init__()
@@ -64,8 +58,6 @@ class TVLoss(nn.Module):
     def _tensor_size(self, t):
         return t.size()[1] * t.size()[2] * t.size()[3]
         
-# ---------------------------
-# 感知损失网络（使用 VGG19 提取中间特征）
 class LossNetwork(torch.nn.Module):
     def __init__(self):
         super(LossNetwork, self).__init__()
@@ -86,40 +78,21 @@ class LossNetwork(torch.nn.Module):
                 output[self.layer_name_mapping[name]] = x
         return output
 
-# ---------------------------
-# 定义 Haze Line Loss
+
 def haze_line_loss(fake, hazy, eps=1e-6):
-    """
-    计算 haze line loss：
-    对于每个 batch 内图像，根据 hazy（有云图像）估计大气光 A，
-    然后对 fake（去云后图像）的每个像素，计算其与 haze line 的距离，
-    haze line 定义为经过 A 和原点的直线。为了鼓励去云图像远离 haze line，
-    使用 exp(-distance) 当距离较小时产生较大损失。
-    """
     # fake, hazy: [B, C, H, W]
     B, C, H, W = hazy.shape
-    # 对每张图像，按通道取最大值作为大气光 A
     A = hazy.view(B, C, -1).max(dim=2)[0]  # shape: [B, C]
-    # 计算 A 的 L2 范数的平方（避免除 0）
     A_norm_sq = (A ** 2).sum(dim=1, keepdim=True) + eps  # shape: [B, 1]
-    # 将 A reshape 成 [B, C, 1, 1]，便于后续广播
     A_reshaped = A.view(B, C, 1, 1)
-    # 对 fake 的每个像素，计算与 A 的点积
     dot = (fake * A_reshaped).sum(dim=1, keepdim=True)  # shape: [B, 1, H, W]
-    # 计算 fake 在 A 方向上的投影
     proj = (dot / A_norm_sq.view(B, 1, 1, 1)) * A_reshaped  # shape: [B, C, H, W]
-    # 计算投影残差
     diff = fake - proj
-    # 对每个像素计算 L2 距离
     dist = torch.sqrt((diff ** 2).sum(dim=1) + eps)  # shape: [B, H, W]
-    # 使用指数函数，当距离小（靠近 haze line）时，损失较大
     loss = torch.mean(torch.exp(-dist))
     return loss
 
-# ---------------------------
-# 定义 SSIM 相关函数
 def gaussian_window(window_size, sigma, channel):
-    """创建 2D 高斯窗，用于 SSIM 计算"""
     gauss = torch.Tensor([math.exp(-(x - window_size // 2)**2 / float(2 * sigma**2)) for x in range(window_size)])
     gauss = gauss / gauss.sum()
     _1D_window = gauss.unsqueeze(1)  # shape: [window_size, 1]
@@ -128,10 +101,6 @@ def gaussian_window(window_size, sigma, channel):
     return window
 
 def ssim(pred, target, window_size=11, sigma=1.5, size_average=True):
-    """
-    计算 SSIM 指数。参见论文：
-    Wang et al., "Image quality assessment: from error visibility to structural similarity", IEEE TPAMI, 2004.
-    """
     (_, channel, _, _) = pred.size()
     window = gaussian_window(window_size, sigma, channel).to(pred.device)
     
@@ -156,11 +125,9 @@ def ssim(pred, target, window_size=11, sigma=1.5, size_average=True):
         return ssim_map.mean(1).mean(1).mean(1)
 
 def ssim_loss(pred, target):
-    """SSIM Loss 定义为 1 - SSIM 指数"""
     return 1 - ssim(pred, target, size_average=True)
 
-# ---------------------------
-# 参数设置
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--epoch', type=int, default=579, help='epoch to start training from')
 parser.add_argument('--n_epochs', type=int, default=800, help='number of epochs of training')
@@ -189,15 +156,11 @@ os.makedirs('saved_models/%s' % opt.dataset_name, exist_ok=True)
 
 cuda = True if torch.cuda.is_available() else False
 
-# ---------------------------
-# 损失函数
+
 criterion_GAN = torch.nn.MSELoss()
 criterion_pixelwise = torch.nn.L1Loss()
-# TVLoss 的权重可以单独调节
 tvloss = TVLoss(TVLoss_weight=1.0)
 lossmse = torch.nn.MSELoss()
-
-# 这里定义各项损失的权重（可根据实际任务调参）
 lambda_pixel = 100
 lambda_haze_line = 10
 lambda_ssim = 5
@@ -205,8 +168,7 @@ lambda_tv = 0.1
 
 patch = (1, opt.img_height // 2**4, opt.img_width // 2**4)
 
-# ---------------------------
-# 初始化模型
+
 img_channel = 3
 dim = 32
 enc_blks = [2, 2, 2, 4]
@@ -226,12 +188,10 @@ if cuda:
 if opt.epoch != 0:
     generator.load_state_dict(torch.load('./saved_models/rice1/lastest.pth'), strict=True)
 else:
-    # 初始化权重
     generator.apply(weights_init_normal)
 
 device = torch.device("cuda:0")
 
-# 优化器
 optimizer_G = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
 mytransform = transforms.Compose([
@@ -239,7 +199,6 @@ mytransform = transforms.Compose([
     # transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
 ])
     
-# 修改为你自己的数据路径
 data_root = '../autodl-tmp/RICE1/train'
 myfolder = myImageFloder(root=data_root, transform=mytransform, crop=False, resize=False, crop_size=512, resize_size=512)
 dataloader = DataLoader(myfolder, num_workers=opt.n_cpu, batch_size=opt.batch_size, shuffle=True)
@@ -273,8 +232,7 @@ def sample_images(epoch, i, real_A, real_B, fake_B):
     img = Image.fromarray(img)
     img.save("./train_result/rice1/%03d_%06d.png" % (epoch, i))
     
-# ---------------------------
-# 训练循环
+
 prev_time = time.time()
 step = 0
 best_psnr = 40
@@ -283,26 +241,22 @@ for epoch in range(opt.epoch, opt.n_epochs):
     epoch_psnr = []
     for i, batch in enumerate(tqdm(dataloader), 0):
         step += 1
-        # 学习率衰减策略（示例）
         current_lr = opt.lr * (1 / 2)**(step / 100000)
         for param_group in optimizer_G.param_groups:
             param_group["lr"] = current_lr
             
         img_train = batch
-        # 假设 img_train[0] 是有云图像，img_train[1] 是去云（ground truth）图像
         real_A, real_B = Variable(img_train[0].cuda()), Variable(img_train[1].cuda())
         batch_size = real_B.size(0)
         
         optimizer_G.zero_grad()
         fake_B = generator(real_A)
         
-        # 计算各项损失
         loss_pixel = criterion_pixelwise(fake_B, real_B)
         loss_haze = haze_line_loss(fake_B, real_A)
         loss_ssim = ssim_loss(fake_B, real_B)
         loss_tv_val = tvloss(fake_B)
         
-        # 总损失：各项损失加权求和
         loss_G = (lambda_pixel * loss_pixel +
                   lambda_haze_line * loss_haze +
                   lambda_ssim * loss_ssim +
