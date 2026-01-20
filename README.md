@@ -27,10 +27,7 @@
   <img src="assets/framework.png" width="90%" alt="WaveDiffDecloud Framework">
 </p>
 
----
 
-
----
 
 ## 📖 Abstract
 
@@ -41,8 +38,6 @@ Cloud cover frequently occludes up to **60%** of optical satellite acquisitions,
 > 📊 **Key Results:** On the **RICE-I dataset**, our method achieves:
 > - **SSIM: 0.957** 
 > - **LPIPS: 0.063** 
-> - Significantly outperforming existing methods in texture fidelity
-
 ---
 
 ## ✨ Highlights
@@ -79,11 +74,6 @@ conda activate wavediff
 pip install -r requirements.txt
 
 
-
-📁 Dataset Preparation
-
-Download and organize the datasets as follows:
-
 datasets/
 ├── RICE/
 │   ├── RICE1/
@@ -96,13 +86,6 @@ datasets/
     ├── train/
     ├── val/
     └── test/
-
-
-
-🚀 Usage
-Training
-
-Training consists of two stages:
 
 # Stage 1: Train Structure-Texture Module (StruTex-HFR)
 python train_StruTex.py
@@ -117,7 +100,6 @@ python train_diffusion.py --config "rice2.yml" --resume "Rice2_ddpm.pth.tar"
 # For custom dataset
 python train_diffusion.py --config "your_config.yml" --resume "your_checkpoint.pth.tar"
 
-Evaluation
 # General evaluation
 python test_script.py
 
@@ -127,36 +109,19 @@ python eval_diffusion.py --config "rice1.yml" --resume "Rice1_epoch2000_ddpm.pth
 # Evaluate on RICE-II
 python eval_diffusion.py --config "rice2.yml" --resume "Rice2_epoch2000_ddpm.pth.tar"
 
-Configuration
-
-Configuration files are located in configs/:
-
-Config File	Description
-rice1.yml	RICE dataset variant 1
-rice2.yml	RICE dataset variant 2
-🧠 Model Architecture
-┌─────────────────────────────────────────────────────────────────────┐
-│                     WaveDiffDecloud Framework                       │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ┌──────────┐      ┌─────────────────┐      ┌──────────────────┐   │
-│   │  Cloudy  │      │ Wavelet Domain  │      │   Conditional    │   │
-│   │  Image   │─────►│   Transform     │─────►│   Diffusion      │   │
-│   │          │      │   (DWT)         │      │   Model          │   │
-│   └──────────┘      └─────────────────┘      └────────┬─────────┘   │
-│                                                       │             │
-│                                                       ▼             │
-│   ┌──────────┐      ┌─────────────────┐      ┌──────────────────┐   │
-│   │  Clean   │      │ Inverse Wavelet │      │  StruTex-HFR     │   │
-│   │  Image   │◄─────│   Transform     │◄─────│  Module          │   │
-│   │          │      │   (IDWT)        │      │                  │   │
-│   └──────────┘      └─────────────────┘      └──────────────────┘   │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-
-Key Components
-Component	Function
-Wavelet Transform	Converts images to wavelet domain (LL, LH, HL, HH subbands)
-Conditional Diffusion	Generates cloud-free wavelet coefficients
-StruTex-HFR	Enhances high-frequency details and edge sharpness
-Multi-scale Loss	Combines pixel-level and perceptual losses
+WaveDiffDecloud/
+├── configs/                    # Configuration files
+│   ├── rice1.yml
+│   └── rice2.yml
+├── datasets/                   # Dataset loaders
+├── models/                     # Model architectures
+│   ├── diffusion/              # Diffusion model
+│   ├── wavelet/                # DWT & IDWT modules
+│   └── strutex_hfr.py          # High-frequency reconstruction
+├── utils/                      # Utility functions
+├── train_StruTex.py            # Stage 1 training
+├── train_diffusion.py          # Stage 2 training
+├── eval_diffusion.py           # Evaluation script
+├── test_script.py              # Testing script
+├── requirements.txt
+└── README.md
