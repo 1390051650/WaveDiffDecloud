@@ -1,137 +1,94 @@
-# WaveDiffDecloud: Wavelet-Domain Conditional Diffusion Model for Efficient Cloud Removal
+WaveDiffDecloud: Wavelet-Domain Conditional Diffusion Model for Efficient Cloud Removal
+Official implementation code for the paper "WaveDiffDecloud: Wavelet-Domain Conditional Diffusion Model for Efficient Cloud Removal" by Yingjie Huang et al.
 
-#### This is the official implementation code for the paper "WaveDiffDecloud: Wavelet-Domain Conditional Diffusion Model for Efficient Cloud Removal" by Yingjie Huang.
+📖 Abstract
+This repository contains the official implementation of WaveDiffDecloud, a novel approach for cloud removal in satellite imagery using wavelet-domain conditional diffusion models.
+Cloud cover frequently occludes up to 60% of optical satellite acquisitions, creating data gaps and radiometric distortions that impede continuous Earth-monitoring applications. While traditional diffusion models show promise, they often suffer from slow inference speeds and texture blurring in high-dimensional pixel space.
+WaveDiffDecloud addresses these limitations by learning to synthesize the wavelet coefficients of cloud-free images rather than generating pixels directly. This design substantially reduces computational complexity while preserving fine structural details. Experimental results on RICE and NUAA-CR4L89 benchmarks demonstrate that WaveDiffDecloud achieves state-of-the-art performance. Notably, on the RICE-I dataset, our method achieves the best SSIM of 0.957 and LPIPS of 0.063, significantly outperforming existing methods in texture fidelity while maintaining competitive PSNR.
 
-## Abstract
+✨ Key Features
+Wavelet-Domain Generative Process: Synthesizes wavelet coefficients instead of pixels to reduce computational complexity and accelerate inference while maintaining high-quality output.
+Structure-Aware Reconstruction: Features a specialized Structure-and Texture-aware High-Frequency Reconstruction module that models correlations among high-frequency subbands to recover sharp boundaries and surface textures.
+Physics-Inspired Optimization: Utilizes a cloud-aware loss function to explicitly target and resolve radiometric distortions and boundary artifacts at cloud edges.
+Spectral Consistency: Demonstrates exceptional robustness across multi-band scenarios, maintaining consistency from visible to thermal infrared wavelengths.
+Comprehensive Evaluation: Includes training and testing scripts verified on RICE and NUAA-CR4L89 datasets, with support for extending to other satellite imagery formats.
 
-This repository contains the implementation of WaveDiffDecloud, a novel approach for cloud removal in satellite imagery using wavelet-domain conditional diffusion models. The method leverages the multi-scale representation capabilities of wavelets combined with the powerful generative capabilities of diffusion models to efficiently remove clouds while preserving fine details in satellite images.(The complete code will be uploaded after the paper is accepted)
-
-## Key Features
-
-- **Wavelet-Domain Processing**: Utilizes wavelet transforms for multi-scale image representation
-- **Conditional Diffusion Models**: Employs diffusion models conditioned on cloud-free information
-- **Efficient Cloud Removal**: Optimized for both quality and computational efficiency
-- **Multiple Dataset Support**: Compatible with various satellite imagery datasets (raindrop, rice1, rice2, etc.)
-- **Comprehensive Evaluation**: Includes training and testing scripts for different scenarios
-- **Easy-to-use Examples**: Quick start scripts and detailed documentation
-
-## Notes
-
-📰 2024: The official implementation is released. This code provides a complete framework for training and evaluating the WaveDiffDecloud model for cloud removal tasks.
-
-
-## Requirements
-
-```
+🛠️ Requirements
+code
+Bash
 pip install -r requirements.txt
-```
-
-## Installation
-
-1. Clone this repository:
-```bash
+🚀 Installation
+Clone this repository:
+code
+Bash
 git clone https://github.com/1390051650/WaveDiffDecloud.git
 cd WaveDiffDecloud
-```
-
-2. Install dependencies:
-```bash
+Install dependencies:
+code
+Bash
 pip install -r requirements.txt
-```
+🏃 Usage
+1. Training
+You can train the WaveDiffDecloud model on different datasets. The training process generally involves the structural/texture module and the diffusion model.
+Train on Rice dataset variants:
+code
+Bash
+# Step 1: Train the Structure-Texture module
+python train_StruTex.py
 
-## Usage
-
-### Training
-
-Train the WaveDiffDecloud model on different datasets:
-
-```bash
-
-# Train on rice dataset variants
+# Step 2: Train the Diffusion model
 python train_diffusion.py --config "rice1.yml" --resume "Rice1_ddpm.pth.tar"
+Train with custom configurations:
+code
+Bash
+python train_StruTex.py
+python train.py --config "your_config.yml" --resume "your_checkpoint.pth.tar"
+2. Evaluation
+Test the trained models to evaluate weather/cloud removal performance.
+code
+Bash
+# General test script
+python test_script.py
 
-# Train with different configurations
-python train_hfrm.py
-python train.py --config "rice2.yml" --resume "Rice2_ddpm.pth.tar"
-```
-
-### Evaluation
-
-Test the trained models:
-
-```bash
-# Test weather/cloud removal performance
-python test_weather_script.py
-
-# Evaluate on rice datasets
-python eval_diffusion.py --config "rice1.yml" --resume "Rice1_epoch1140_ddpm.pth.tar"
-python eval_diffusion.py --config "rice1.yml" --resume "Rice1_epoch390_ddpm.pth.tar"
-```
-
-### Configuration
-
-The model can be configured using YAML files in the `configs/` directory:
-- `rice1.yml`: Rice dataset variant 1
-- `rice2.yml`: Rice dataset variant 2
-
-## Quick Start
-
-For a quick demonstration of cloud removal, use the provided example script:
-
-```bash
-python examples/quick_start.py --input path/to/cloudy_image.jpg --output path/to/clean_image.jpg
-```
-
-See the [examples/README.md](examples/README.md) for more detailed usage instructions.
-
-## Model Architecture
-
-The WaveDiffDecloud model consists of several key components:
-
-- **Wavelet Transform Module**: Converts images to wavelet domain for multi-scale processing
-- **Conditional Diffusion Model**: Generates cloud-free images conditioned on input features
-- **U-Net Architecture**: Modified U-Net with wavelet-aware processing
-- **Multi-scale Loss Functions**: Combines pixel-level and perceptual losses
-
-## Dataset Support
-
-This implementation supports multiple datasets for cloud removal:
-
-- **Rice Datasets**: Agricultural satellite imagery with cloud coverage
-- **Custom Datasets**: Easily extensible to other satellite imagery datasets
-
-## Results
-
-The model achieves state-of-the-art performance on cloud removal tasks with:
-- High-quality cloud-free image generation
-- Efficient processing in wavelet domain
-- Robust performance across different cloud types and densities
-
-## Acknowledgment
-
-This code is heavily based on [PatchDM](https://github.com/IGITUGraz/WeatherDiffusion). Many thanks to the authors!
-
-## Citation
-
-If you find this repository/work helpful in your research, please cite our paper:
-
-```bibtex
-@article{huang2024wavediffdecloud,
-  title={WaveDiffDecloud: Wavelet-Domain Conditional Diffusion Model for Efficient Cloud Removal},
-  author={Huang, Yingjie},
-  journal={},
-  year={2024},
-  publisher={}
+# Evaluate on Rice datasets
+python eval_diffusion.py --config "rice1.yml" --resume "Rice1_epoch2000_ddpm.pth.tar"
+python eval_diffusion.py --config "rice2.yml" --resume "Rice1_epoch2000_ddpm.pth.tar"
+3. Configuration
+The model can be configured using YAML files located in the configs/ directory:
+rice1.yml: Configuration for Rice dataset variant 1.
+rice2.yml: Configuration for Rice dataset variant 2.
+You can create custom .yml files for other datasets.
+🧠 Model Architecture
+The WaveDiffDecloud framework consists of several key components:
+Wavelet Transform Module: Converts images to the wavelet domain for multi-scale processing.
+Conditional Diffusion Model: Generates cloud-free images conditioned on input cloudy features.
+Modified U-Net: A U-Net architecture optimized for wavelet-aware processing.
+Multi-scale Loss Functions: Combines pixel-level losses with perceptual losses for high fidelity.
+📊 Results
+The model achieves state-of-the-art performance on cloud removal tasks:
+High Fidelity: Best SSIM (0.957) and LPIPS (0.063) on RICE-I.
+Efficiency: Significantly faster inference via wavelet domain processing.
+Robustness: Effective across different cloud types and densities.
+🙏 Acknowledgment
+This code is heavily based on PatchDM. Many thanks to the authors for their contributions to the community.
+🖊️ Citation
+If you find this repository or work helpful in your research, please cite our paper:
+code
+Bibtex
+@article{WaveDiffDecloud2026,
+  title = {WaveDiffDecloud: Wavelet-domain conditional diffusion model for efficient cloud removal},
+  journal = {Computers & Geosciences},
+  volume = {209},
+  pages = {106121},
+  year = {2026},
+  issn = {0098-3004},
+  doi = {10.1016/j.cageo.2026.106121},
+  url = {https://www.sciencedirect.com/science/article/pii/S009830042600018X},
+  author = {Huang, Yingjie and Wang, Zewen and Luo, Min and Qiu, Shufang}
 }
-```
-
-## License
-
+📜 License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
+📧 Contact
 For questions and support, please contact:
-- Author: Yingjie Huang
-- Email: [2020110298@ecut.edu.cn]
-
+Author: Yingjie Huang
+Email: 2020110298@ecut.edu.cn
